@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>listado competidores</title>
+  <title>Xpartano - El Circuito de las Bestias</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:300,400,700" />
+  <link rel="stylesheet" href="assets/css/fonts.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script>
     //this variable will contains the webSocket instance
@@ -18,9 +21,11 @@
       //check if we got an array
       if(competitors &&  competitors instanceof Array && competitors.length>0){
         var liElements="";
+        var cssclass="";
         //loop through each competitor
         for(c=0;c<competitors.length;c++){
-          liElements+="<li>"+"name= "+competitors[c].name+", lastName= "+competitors[c].lastName+", score ="+competitors[c].score+"</li>";
+          cssclass = (c % 2 == 0) ? 'even' : 'odd'; 
+          liElements+='<li class="'+cssclass+'"><div class="pos">'+(c+1)+'.</div><div class="competitor">'+competitors[c].name+' '+competitors[c].lastName+'</div><div class="score">'+competitors[c].score+'</div></li>';
         }
         $(".competidores-list").append(liElements);
       }
@@ -75,7 +80,10 @@
   </script>
 </head>
   <body>
-    <h1> Lista competidores </h1>
-    <ul class="competidores-list"></ul>
+    <section class="fs">
+      <img class="logo" src="assets/images/Logo-Xpartano-Hardcore-White.svg" alt="" />
+      <ul class="competidores-list"></ul>
+      <img class="ciclo7" src="assets/images/LogoSimboloCiclo7.svg" alt="Ciclo7" />
+    </section>
   </body>
 </html>

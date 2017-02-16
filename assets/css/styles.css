@@ -1,0 +1,89 @@
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-image: url('../images/military-background.jpg');
+  background-size: cover;
+  font-family: Oswald,sans-serif;
+  font-weight: 400
+}
+
+section {
+	position: relative
+}
+section:before,
+section:after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+	
+.fs {
+	position: relative;
+	overflow: hidden;
+	width: 100vw;
+	height: 100vh;
+  background-color: rgba(0,0,0,0.3)
+}
+
+.logo {
+  height: 170px;
+  position: absolute;
+  margin: 0 auto;
+  text-align: center;
+  top: 24px;
+  left: 0;
+  right: 0;
+}
+
+
+.competidores-list {
+  position: relative;
+  top: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  max-width: 1000px;
+}
+.competidores-list li {
+  padding: 5px 10px;
+  font-size: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+.competidores-list li .pos {
+  text-align: center;
+  width: 100px;
+}
+.competidores-list li .competitor {
+  text-align: left;
+  padding-left: 10px;
+  width: 100%
+}
+.competidores-list li .score {
+  text-align: right;
+  width: 160px;
+  padding-right: 10px;
+}
+.competidores-list li.even {
+  background: #FFF;
+  color: #000;
+}
+.competidores-list li.odd {
+  background: transparent;
+  color: #FFF;
+}
+.ciclo7 {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  height: 24px;
+}

@@ -7,8 +7,11 @@
   <title>Admin panel</title>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <style>
-    .new-competitor-form{
+    .new-competitor-form-hide{
       display: none;
+    }
+    .new-competitor-form-show{
+      display: block;
     }
   </style>
 </head>
@@ -18,7 +21,7 @@
   <ul class="competidores-list"></ul>
   <input type="button" value="Add new competitor" id="addCompetitor">
 
-  <div class="new-competitor-form">
+  <div class="new-competitor-form new-competitor-form-hide">
     <span>Select the competitor</span>
     <select class="select-competitors">
       <option value=""></option>
@@ -37,25 +40,36 @@
       var competitorArrayIndex=$(".select-competitors").val();
       var competitorScore=$(".score-competitor").val();
       sentNewDataToConnectedClients(competitorArrayIndex,competitorScore)
-      showCompetitorForm("none");
+      hideCompetitorForm();
     })
 
     //show up new competitor form
-    function showCompetitorForm(option){
+    function showCompetitorForm(){
       $("#addCompetitor").click(function(){
-        if(!option){
-          $(".new-competitor-form").css("display","block")
+        var formCompetitor=$(".new-competitor-form");
+
+        if( formCompetitor.hasClass("new-competitor-form-hide") ){
+          formCompetitor.removeClass("new-competitor-form-hide");
+          formCompetitor.addClass("new-competitor-form-show");
         }
-        else{
-          $(".new-competitor-form").css("display","none")
-        }
-        console.log("adding new competitor..")
       })
+    }
+
+    function hideCompetitorForm(){
+      var formCompetitor=$(".new-competitor-form");
+
+      if( $(".new-competitor-form").hasClass("new-competitor-form-show") ){
+        formCompetitor.removeClass("new-competitor-form-show");
+        formCompetitor.addClass("new-competitor-form-hide");
+      }
     }
 
 
     //this function append all li to the ul tag
     function drawCompetitorsOnDom(competitors){
+      //clear the current list
+      $(".competidores-list").html("");
+
       if(competitors &&  competitors instanceof Array && competitors.length>0){
         //set the competitors from server
         competitorsList=competitors;
@@ -63,7 +77,7 @@
         var selectCompetitors="";
 
         for(c=0;c<competitors.length;c++){
-          liElements+="<li class='competitor-"+c+"'>"+competitors[c].name+" "+competitors[c].lastName+"</li>";
+          liElements+="<li>"+"name= "+competitors[c].name+", lastName= "+competitors[c].lastName+", score ="+competitors[c].score+"</li>";
           selectCompetitors+="<option value='"+c+"'>"+competitors[c].name+"</option>"
         }
 
@@ -79,6 +93,7 @@
         url:"competidoresDb.php",
         dataType:'json',
         success:function(competitors){
+          competitorsList=competitors;
           console.log("competitors from server",competitors)
           drawCompetitorsOnDom(competitors)
         },
@@ -103,21 +118,33 @@
         //var lele=JSON.parse(data);
         //console.log(typeof lele)
       };
+
+      conn.onerror=function(e){
+        alert("Websocket server is down!!")
+      }
     }
 
     function sentNewDataToConnectedClients(index,score){
       //set the object to update
       let competitorToUpdate={"score":score,"arrayIndex":index}
+      //append the updated competitor to the list of competitors
+      competitorsList[index]["score"]=score;
+      //re draw the list of competitors on dom
+      drawCompetitorsOnDom(competitorsList);
       //convert the json to string
       competitorToUpdate=JSON.stringify(competitorToUpdate);
-      conn.send(competitorToUpdate)
+      //sent the new data to the connected clients
+      conn.send(competitorToUpdate);
+      alert("Competidor actualizado!")
     }
     //stablish connection with socket
     connectToWebSocket();
     //get competitors from server file
     getCompetitors();
-    //handler to show up the new competitor form
+    //handler to show the new competitor form
     showCompetitorForm();
+    //handler to hide the new competitor form
+    hideCompetitorForm();
   </script>
 </body>
 </html>
