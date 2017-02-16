@@ -93,8 +93,8 @@
     function connectToWebSocket(){
       conn = new WebSocket('ws://192.169.165.156:8080');
       conn.onopen = function(e) {
-        console.log("Connection established!");
-        conn.send("hey nigga")
+        console.log("Connected to webSocket!");
+        //conn.send("hey nigga")
       };
 
       conn.onmessage = function(e) {
@@ -106,12 +106,17 @@
     }
 
     function sentNewDataToConnectedClients(index,score){
-      console.log("index",index);
-      console.log("score",score)
-      //conn.send(msg)
+      //set the object to update
+      let competitorToUpdate={"score":score,"arrayIndex":index}
+      //convert the json to string
+      competitorToUpdate=JSON.stringify(competitorToUpdate);
+      conn.send(competitorToUpdate)
     }
-
+    //stablish connection with socket
+    connectToWebSocket();
+    //get competitors from server file
     getCompetitors();
+    //handler to show up the new competitor form
     showCompetitorForm();
   </script>
 </body>

@@ -9,12 +9,18 @@
   <script>
     //this variable will contains the webSocket instance
     var conn="";
+    var competitorsList=[];
+
     //this function append all li to the ul tag
     function drawCompetitorsOnDom(competitors){
+      //clear the current list
+      $(".competidores-list").html("");
+      //check if we got an array
       if(competitors &&  competitors instanceof Array && competitors.length>0){
         var liElements="";
+        //loop through each competitor
         for(c=0;c<competitors.length;c++){
-          liElements+="<li>"+competitors[c].name+" "+competitors[c].lastName+"</li>";
+          liElements+="<li>"+"name= "+competitors[c].name+", lastName= "+competitors[c].lastName+", score ="+competitors[c].score+"</li>";
         }
         $(".competidores-list").append(liElements);
       }
@@ -27,6 +33,7 @@
         url:"competidoresDb.php",
         dataType:'json',
         success:function(competitors){
+          competitorsList=competitors;
           console.log("competitors from server",competitors)
           drawCompetitorsOnDom(competitors)
         },
@@ -41,21 +48,28 @@
     function connectToWebSocket(){
       conn = new WebSocket('ws://192.169.165.156:8080');
       conn.onopen = function(e) {
-        console.log("Connection established!");
-        conn.send("hey nigga")
+        console.log("Connected to webSocket!");
       };
 
       conn.onmessage = function(e) {
         var data=e.data;
-         console.log("data",data)
-        //var lele=JSON.parse(data);
-        //console.log(typeof lele)
+         console.log("I have received ",data)
+        //check if we got an object
+        if(  typeof JSON.parse(data) ==='object' ){
+          var competitor=JSON.parse(data);
+          //update just the modified competitor within the array
+          competitorsList[competitor.arrayIndex]["score"]=competitor.score;
+          console.log("new competitors ",competitorsList)
+          //update the view with the new values
+          drawCompetitorsOnDom(competitorsList);
+        }
+        console.log(typeof lele)
       };
     }
-
-    getCompetitors();
+    //stablish connection with socket
     connectToWebSocket();
-
+    //get competitors from server file
+    getCompetitors();
 
 
   </script>
