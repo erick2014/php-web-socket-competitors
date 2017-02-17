@@ -15,27 +15,29 @@
       display: block;
     }
 
-    .new-competitor-box,.edit-competitor-form{
+    .new-competitor-box,.edit-competitor-form,.edit-round-box{
       margin-top: 20px;
     }
 
-    .new-competitor-box,.edit-competitor-form span{
+    .new-competitor-box,.edit-competitor-form span,.my-btn{
       margin: 10px;
     }
 
-    .new-competitor-box.hide{
+    .new-competitor-box.hide,.edit-round-box.hide{
       display: none;
     }
-    .new-competitor-box.show{
+    .new-competitor-box.show,.edit-round-box.show{
       display: block;
     }
   </style>
 </head>
 <body>
   <h1>Admin panel</h1>
-  <h1> Lista competidores </h1>
+  <h2>Ronda actual: <span id="currentRoundText"></span></h2>
+  <h2> Lista competidores: </h2>
   <ul class="competidores-list"></ul>
-  <input type="button" value="Edit score" id="editCompetitor">
+  <input type="button" value="Editar puntaje" id="editCompetitor">
+  <input type="button" value="Editar ronda" class="my-btn edit-round-btn">
   <!-- <input type="button" value="Add a new competitor" class="my-btn new-competitor-btn" id="addCompetitor"> -->
 
   <div class="edit-competitor-form edit-competitor-form-hide">
@@ -60,16 +62,25 @@
     </form>
   </div>
 
+  <div class="edit-round-box hide">
+    <form id="editRoundCompetitorForm">
+      <span>Ronda</span>
+      <input type="text" id="roundNumber" name="roundNumber">
+      <input type="button" id="saveRoundCompetitor" value="save">
+    </form>
+  </div>
+
   <script>
     //this variable will contains the webSocket instance
     var conn="";
     var competitorsList=[];
+    var currentRoundGlobal=0;
 
     //once the user clicks on save btn sent the update to the competitors.html page
     $(".update-competitor-btn").click(function(){
       var competitorArrayIndex=$(".select-competitors").val();
       var competitorScore=$(".score-competitor").val();
-      sentNewDataToConnectedClients(competitorArrayIndex,competitorScore)
+      sentNewDataToConnectedClients("updateCompetitor",competitorArrayIndex,competitorScore)
       hideEditCompetitorForm();
     })
 
@@ -80,12 +91,19 @@
       saveCompetitorInDb(formFields);
     })
 
-    function showNewCompetitorForm(){
+    $("#saveRoundCompetitor").click(function(){
+      //get the form values
+      roundNumber=currentRoundGlobal+1;
+      $("#currentRoundText").text(roundNumber);
+      sentNewDataToConnectedClients("updateRound",roundNumber)
+      $(".my-btn").trigger("click")
+    })
+
+    function showAnyForm(){
       $(".my-btn").click(function(){
         var btnElement=$(this);
         //new competitor form stuff
         if( btnElement.hasClass("new-competitor-btn") ){
-          console.log("went here")
           var newCompetitorFormElement=$(".new-competitor-box");
           if( newCompetitorFormElement.hasClass("hide") ){
             newCompetitorFormElement.removeClass("hide");
@@ -96,8 +114,18 @@
             newCompetitorFormElement.addClass("hide");
           }
         }
+        else if( btnElement.hasClass("edit-round-btn") ) {
+          var newRoundFormElement=$(".edit-round-box");
+          if( newRoundFormElement.hasClass("hide") ){
+            newRoundFormElement.removeClass("hide");
+            newRoundFormElement.addClass("show");
+          }
+          else if( newRoundFormElement.hasClass("show") ){
+            newRoundFormElement.removeClass("show");
+            newRoundFormElement.addClass("hide");
+          }
+        }
 
-        console.log("this",this);
 
       })
     }
@@ -136,7 +164,7 @@
 
         for(c=0;c<competitors.length;c++){
           liElements+="<li>"+"name= "+competitors[c].name+", lastName= "+competitors[c].lastName+", score ="+competitors[c].score+"</li>";
-          selectCompetitors+="<option value='"+c+"'>"+competitors[c].name+"</option>"
+          selectCompetitors+="<option value='"+c+"'>"+competitors[c].name+" "+competitors[c].lastName+"</option>"
         }
 
         $(".competidores-list").append(liElements);
@@ -197,18 +225,32 @@
       }
     }
 
-    function sentNewDataToConnectedClients(index,score){
-      //set the object to update
-      let competitorToUpdate={"score":score,"arrayIndex":index}
-      //append the updated competitor to the list of competitors
-      competitorsList[index]["score"]=score;
-      //re draw the list of competitors on dom
-      drawCompetitorsOnDom(competitorsList);
-      //convert the json to string
-      competitorToUpdate=JSON.stringify(competitorToUpdate);
-      //sent the new data to the connected clients
-      conn.send(competitorToUpdate);
-      alert("Competidor actualizado!")
+    function sentNewDataToConnectedClients(action,index,score){
+      switch (action) {
+
+        case "updateCompetitor":
+          //set the object to update
+          let competitorToUpdate={"score":score,"arrayIndex":index}
+          //append the updated competitor to the list of competitors
+          competitorsList[index]["score"]=score;
+          //re draw the list of competitors on dom
+          drawCompetitorsOnDom(competitorsList);
+          //convert the json to string
+          competitorToUpdate=JSON.stringify(competitorToUpdate);
+          //sent the new data to the connected clients
+          conn.send(competitorToUpdate);
+          alert("Competidor actualizado!")
+          break;
+
+        case "updateRound":
+          let objRound={"currentRound":index};
+          objRound=JSON.stringify(objRound);
+          conn.send(objRound);
+          alert("Ronda actualizada!")
+          break;
+
+      }
+
     }
     //stablish connection with socket
     connectToWebSocket();
@@ -219,7 +261,7 @@
     //handler to hide the new competitor form
     hideEditCompetitorForm();
     //show new competitor form
-    showNewCompetitorForm();
+    showAnyForm();
   </script>
 </body>
 </html>

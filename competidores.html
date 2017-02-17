@@ -14,6 +14,7 @@
   <body>
     <section class="fs">
       <img class="logo" src="assets/images/Logo-Xpartano-Hardcore-White.svg" alt="" />
+      <h1 class="round-title">Ronda actual: <span class="current-round-text"></span></h1>
       <ul class="competidores-list"></ul>
       <img class="ciclo7" src="assets/images/LogoSimboloCiclo7.svg" alt="Ciclo7" />
     </section>
@@ -22,6 +23,7 @@
       //this variable will contains the webSocket instance
       var conn="";
       var competitorsList=[];
+      var currentRoundGlobal=0;
 
       //this function append all li to the ul tag
       function drawCompetitorsOnDom(competitors){
@@ -69,13 +71,24 @@
           var data=e.data;
           //check if we got an object
           if(  typeof JSON.parse(data) ==='object' ){
-            var competitor=JSON.parse(data);
-            var score=parseInt(competitor.score);
-            //update just the modified competitor within the array
-            competitorsList[competitor.arrayIndex]["score"]=score;
-            orderCompetitorsList(competitorsList);
+            var dataAsJson=JSON.parse(data);
+
+            //check if we are updating a competitor
+            if( dataAsJson && dataAsJson.score ){
+              var competitor=JSON.parse(data);
+              var score=parseInt(competitor.score);
+              //update just the modified competitor within the array
+              competitorsList[competitor.arrayIndex]["score"]=score;
+              orderCompetitorsList(competitorsList);
+            }
+            //check if we are updating a round
+            else if( dataAsJson.currentRound ){
+              currentRoundGlobal=dataAsJson.currentRound;
+              $(".current-round-text").text(currentRoundGlobal)
+            }
+
           }
-          console.log(typeof lele)
+
         };
       }
 

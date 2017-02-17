@@ -19,13 +19,21 @@ section:after {
   content: '';
   pointer-events: none;
 }
-	
+
 .fs {
 	position: relative;
 	overflow: hidden;
 	width: 100vw;
 	height: 100vh;
   background-color: rgba(0,0,0,0.3)
+}
+
+h1.round-title{
+  position: relative;
+  top: 256px;
+  color: white;
+  margin: 0 auto;
+  max-width: 1000px;
 }
 
 .logo {
