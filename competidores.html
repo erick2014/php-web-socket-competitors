@@ -9,75 +9,7 @@
   <link rel="stylesheet" href="assets/css/fonts.css" />
   <link rel="stylesheet" href="assets/css/styles.css" />
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
-  <script>
-    //this variable will contains the webSocket instance
-    var conn="";
-    var competitorsList=[];
 
-    //this function append all li to the ul tag
-    function drawCompetitorsOnDom(competitors){
-      //clear the current list
-      $(".competidores-list").html("");
-      //check if we got an array
-      if(competitors &&  competitors instanceof Array && competitors.length>0){
-        var liElements="";
-        var cssclass="";
-        //loop through each competitor
-        for(c=0;c<competitors.length;c++){
-          cssclass = (c % 2 == 0) ? 'even' : 'odd'; 
-          liElements+='<li class="'+cssclass+'"><div class="pos">'+(c+1)+'.</div><div class="competitor">'+competitors[c].name+' '+competitors[c].lastName+'</div><div class="score">'+competitors[c].score+'</div></li>';
-        }
-        $(".competidores-list").append(liElements);
-      }
-    }
-
-    //get all competitors from server
-    function getCompetitors(){
-      $.ajax({
-        type:'GET',
-        url:"competidoresDb.php",
-        dataType:'json',
-        success:function(competitors){
-          competitorsList=competitors;
-          console.log("competitors from server",competitors)
-          drawCompetitorsOnDom(competitors)
-        },
-        error:function(error){
-          console.error("here error ",error);
-        }
-
-      })
-    }
-
-    //remember to connect through ssh and verify if the webSocket server is running on port 8080
-    function connectToWebSocket(){
-      conn = new WebSocket('ws://192.169.165.156:8080');
-      conn.onopen = function(e) {
-        console.log("Connected to webSocket!");
-      };
-
-      conn.onmessage = function(e) {
-        var data=e.data;
-         console.log("I have received ",data)
-        //check if we got an object
-        if(  typeof JSON.parse(data) ==='object' ){
-          var competitor=JSON.parse(data);
-          //update just the modified competitor within the array
-          competitorsList[competitor.arrayIndex]["score"]=competitor.score;
-          console.log("new competitors ",competitorsList)
-          //update the view with the new values
-          drawCompetitorsOnDom(competitorsList);
-        }
-        console.log(typeof lele)
-      };
-    }
-    //stablish connection with socket
-    connectToWebSocket();
-    //get competitors from server file
-    getCompetitors();
-
-
-  </script>
 </head>
   <body>
     <section class="fs">
@@ -85,5 +17,75 @@
       <ul class="competidores-list"></ul>
       <img class="ciclo7" src="assets/images/LogoSimboloCiclo7.svg" alt="Ciclo7" />
     </section>
+
+    <script>
+      //this variable will contains the webSocket instance
+      var conn="";
+      var competitorsList=[];
+
+      //this function append all li to the ul tag
+      function drawCompetitorsOnDom(competitors){
+        //clear the current list
+        $(".competidores-list").html("");
+        //check if we got an array
+        if(competitors &&  competitors instanceof Array && competitors.length>0){
+          var liElements="";
+          var cssclass="";
+          //loop through each competitor
+          for(c=0;c<competitors.length;c++){
+            cssclass = (c % 2 == 0) ? 'even' : 'odd';
+            liElements+='<li class="'+cssclass+'"><div class="pos">'+(c+1)+'.</div><div class="competitor">'+competitors[c].name+' '+competitors[c].lastName+'</div><div class="score">'+competitors[c].score+'</div></li>';
+          }
+          $(".competidores-list").append(liElements);
+        }
+      }
+
+      //get all competitors from server
+      function getCompetitors(){
+        $.ajax({
+          type:'GET',
+          url:"competidoresDb.php",
+          dataType:'json',
+          success:function(competitors){
+            competitorsList=competitors;
+            console.log("competitors from server",competitors)
+            drawCompetitorsOnDom(competitors)
+          },
+          error:function(error){
+            console.error("here error ",error);
+          }
+
+        })
+      }
+
+      //remember to connect through ssh and verify if the webSocket server is running on port 8080
+      function connectToWebSocket(){
+        conn = new WebSocket('ws://192.169.165.156:8080');
+        conn.onopen = function(e) {
+          console.log("Connected to webSocket!");
+        };
+
+        conn.onmessage = function(e) {
+          var data=e.data;
+           console.log("I have received ",data)
+          //check if we got an object
+          if(  typeof JSON.parse(data) ==='object' ){
+            var competitor=JSON.parse(data);
+            //update just the modified competitor within the array
+            competitorsList[competitor.arrayIndex]["score"]=competitor.score;
+            console.log("new competitors ",competitorsList)
+            //update the view with the new values
+            drawCompetitorsOnDom(competitorsList);
+          }
+          console.log(typeof lele)
+        };
+      }
+      //stablish connection with socket
+      connectToWebSocket();
+      //get competitors from server file
+      getCompetitors();
+
+
+    </script>
   </body>
 </html>
