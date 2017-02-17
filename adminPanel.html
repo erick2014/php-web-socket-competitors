@@ -7,10 +7,22 @@
   <title>Admin panel</title>
   <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <style>
-    .new-competitor-form-hide{
+    .edit-competitor-form-hide{
       display: none;
     }
-    .new-competitor-form-show{
+
+    .edit-competitor-form-show{
+      display: block;
+    }
+
+    .new-competitor-box{
+      margin-top: 20px;
+    }
+
+    .new-competitor-box.hide{
+      display: none;
+    }
+    .new-competitor-box.show{
       display: block;
     }
   </style>
@@ -19,15 +31,28 @@
   <h1>Admin panel</h1>
   <h1> Lista competidores </h1>
   <ul class="competidores-list"></ul>
-  <input type="button" value="Add new competitor" id="addCompetitor">
+  <input type="button" value="Edit score" id="editCompetitor">
+  <input type="button" value="Add a new competitor" class="my-btn new-competitor-btn" id="addCompetitor">
 
-  <div class="new-competitor-form new-competitor-form-hide">
+  <div class="edit-competitor-form edit-competitor-form-hide">
     <span>Select the competitor</span>
     <select class="select-competitors">
       <option value=""></option>
     </select>
     <input type="text" class="score-competitor" placeholder="Score">
-    <input type="button" class="save-competitor" value="save">
+    <input type="button" class="update-competitor-btn" value="save">
+  </div>
+
+  <div class="new-competitor-box hide">
+    <form id="createCompetitorForm">
+      <span>Name</span>
+      <input type="text" id="competitorName" name="competitorName">
+      <span>LastName</span>
+      <input type="text" id="competitorLastName" name="competitorLastName">
+      <span>Score</span>
+      <input type="text" id="competitorScore" name="competitorScore">
+      <input type="button" id="saveNewCompetitor" value="save">
+    </form>
   </div>
 
   <script>
@@ -36,31 +61,58 @@
     var competitorsList=[];
 
     //once the user clicks on save btn sent the update to the competitors.html page
-    $(".save-competitor").click(function(){
+    $(".update-competitor-btn").click(function(){
       var competitorArrayIndex=$(".select-competitors").val();
       var competitorScore=$(".score-competitor").val();
       sentNewDataToConnectedClients(competitorArrayIndex,competitorScore)
       hideCompetitorForm();
     })
 
-    //show up new competitor form
-    function showCompetitorForm(){
-      $("#addCompetitor").click(function(){
-        var formCompetitor=$(".new-competitor-form");
+    $("#saveNewCompetitor").click(function(){
+      //get the form values
+      var formFields=$("#createCompetitorForm").serialize();
+      //sent it to the db
+      saveCompetitorInDb(formFields);
+    })
 
-        if( formCompetitor.hasClass("new-competitor-form-hide") ){
-          formCompetitor.removeClass("new-competitor-form-hide");
-          formCompetitor.addClass("new-competitor-form-show");
+    function showNewCompetitorForm(){
+      $(".my-btn").click(function(){
+        var btnElement=$(this);
+        //new competitor form stuff
+        if( btnElement.hasClass("new-competitor-btn") ){
+          console.log("went here")
+          var newCompetitorFormElement=$(".new-competitor-box");
+          if( newCompetitorFormElement.hasClass("hide") ){
+            newCompetitorFormElement.removeClass("hide");
+            newCompetitorFormElement.addClass("show");
+          }
+          else if( newCompetitorFormElement.hasClass("show") ){
+            newCompetitorFormElement.removeClass("show");
+            newCompetitorFormElement.addClass("hide");
+          }
+        }
+
+        console.log("this",this);
+
+      })
+    }
+
+    //show up new competitor form
+    function showEditCompetitorForm(){
+      $("#editCompetitor").click(function(){
+        var formCompetitor=$(".edit-competitor-form");
+        if( formCompetitor.hasClass("edit-competitor-form-hide") ){
+          formCompetitor.removeClass("edit-competitor-form-hide");
+          formCompetitor.addClass("edit-competitor-form-show");
         }
       })
     }
 
-    function hideCompetitorForm(){
-      var formCompetitor=$(".new-competitor-form");
-
-      if( $(".new-competitor-form").hasClass("new-competitor-form-show") ){
-        formCompetitor.removeClass("new-competitor-form-show");
-        formCompetitor.addClass("new-competitor-form-hide");
+    function hideEditCompetitorForm(){
+      var formCompetitor=$(".edit-competitor-form");
+      if( $(".edit-competitor-form").hasClass("edit-competitor-form-show") ){
+        formCompetitor.removeClass("edit-competitor-form-show");
+        formCompetitor.addClass("edit-competitor-form-hide");
       }
     }
 
@@ -84,6 +136,24 @@
         $(".competidores-list").append(liElements);
         $(".select-competitors").append(selectCompetitors);
       }
+    }
+
+    function saveCompetitorInDb(data){
+      $.ajax({
+        type:'POST',
+        url:"competidoresDb.php",
+        dataType:'json',
+        data:data,
+        success:function(response){
+          //competitor was saved!
+          console.log("response",response);
+          alert("Competitor was created!");
+        },
+        error:function(error){
+          console.error("here error ",error);
+        }
+
+      })
     }
 
     //get all competitors from server
@@ -142,9 +212,11 @@
     //get competitors from server file
     getCompetitors();
     //handler to show the new competitor form
-    showCompetitorForm();
+    showEditCompetitorForm();
     //handler to hide the new competitor form
-    hideCompetitorForm();
+    hideEditCompetitorForm();
+    //show new competitor form
+    showNewCompetitorForm();
   </script>
 </body>
 </html>
