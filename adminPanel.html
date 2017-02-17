@@ -15,8 +15,12 @@
       display: block;
     }
 
-    .new-competitor-box{
+    .new-competitor-box,.edit-competitor-form{
       margin-top: 20px;
+    }
+
+    .new-competitor-box,.edit-competitor-form span{
+      margin: 10px;
     }
 
     .new-competitor-box.hide{
@@ -32,13 +36,14 @@
   <h1> Lista competidores </h1>
   <ul class="competidores-list"></ul>
   <input type="button" value="Edit score" id="editCompetitor">
-  <input type="button" value="Add a new competitor" class="my-btn new-competitor-btn" id="addCompetitor">
+  <!-- <input type="button" value="Add a new competitor" class="my-btn new-competitor-btn" id="addCompetitor"> -->
 
   <div class="edit-competitor-form edit-competitor-form-hide">
     <span>Select the competitor</span>
     <select class="select-competitors">
       <option value=""></option>
     </select>
+    <span>Score</span>
     <input type="text" class="score-competitor" placeholder="Score">
     <input type="button" class="update-competitor-btn" value="save">
   </div>
@@ -65,7 +70,7 @@
       var competitorArrayIndex=$(".select-competitors").val();
       var competitorScore=$(".score-competitor").val();
       sentNewDataToConnectedClients(competitorArrayIndex,competitorScore)
-      hideCompetitorForm();
+      hideEditCompetitorForm();
     })
 
     $("#saveNewCompetitor").click(function(){
@@ -121,6 +126,7 @@
     function drawCompetitorsOnDom(competitors){
       //clear the current list
       $(".competidores-list").html("");
+      $(".select-competitors").html("");
 
       if(competitors &&  competitors instanceof Array && competitors.length>0){
         //set the competitors from server
@@ -146,7 +152,6 @@
         data:data,
         success:function(response){
           //competitor was saved!
-          console.log("response",response);
           alert("Competitor was created!");
         },
         error:function(error){
@@ -185,8 +190,6 @@
       conn.onmessage = function(e) {
         var data=e.data;
          console.log("data",data)
-        //var lele=JSON.parse(data);
-        //console.log(typeof lele)
       };
 
       conn.onerror=function(e){
